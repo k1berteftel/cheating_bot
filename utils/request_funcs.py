@@ -32,7 +32,7 @@ async def fill_request(**kwargs):
 
 async def add_fill_task(channel: str, volume: int, male: int, speed: int, sub_speed: int | None = None):
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
 
         with open('cookies.json', "r") as f:
@@ -72,6 +72,9 @@ async def add_fill_task(channel: str, volume: int, male: int, speed: int, sub_sp
         await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalFrom', str(3))
         await asyncio.sleep(0.2)
         await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalBefore', str(9))
+        await asyncio.sleep(1)
+
+        await page.click('#bSocialCreateOrder', button='left')
 
         await asyncio.sleep(5)
 
