@@ -105,4 +105,4 @@ async def save_cookies():
         await browser.close()
 
 
-#asyncio.run(add_fill_task('ССылка', 500, 2, 4))
+#asyncio.run(add_fill_task(*format_data('ССылка', 121, 'men', 1)))
