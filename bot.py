@@ -76,7 +76,7 @@ async def main():
     except Exception as e:
         logger.exception(e)
     finally:
-        #await nc.close()
+        await nc.close()
         logger.info('Connection closed')
 
 

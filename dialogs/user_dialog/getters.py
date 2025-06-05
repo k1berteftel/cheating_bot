@@ -48,7 +48,7 @@ async def male_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dialog
 
 
 async def get_date(clb: CallbackQuery, widget: ManagedCalendar, dialog_manager: DialogManager, date: datetime.date):
-    dialog_manager.dialog_data['date'] = date
+    dialog_manager.dialog_data['date'] = date.isoformat()
     await dialog_manager.switch_to(startSG.get_time)
 
 
@@ -58,7 +58,7 @@ async def time_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dialog
         time = datetime.time(hour=10, minute=00)
     else:
         time = datetime.time(hour=18, minute=00)
-    dialog_manager.dialog_data['time'] = time
+    dialog_manager.dialog_data['time'] = time.isoformat()
     await dialog_manager.switch_to(startSG.confirm_task)
 
 
@@ -83,8 +83,14 @@ async def add_task(clb: CallbackQuery, widget: Button, dialog_manager: DialogMan
     channel = dialog_manager.dialog_data.get('channel')
     volume = dialog_manager.dialog_data.get('volume')
     male = dialog_manager.dialog_data.get('male')
+
     date = dialog_manager.dialog_data.get('date')
+    date = datetime.date.fromisoformat(date)
+
     time = dialog_manager.dialog_data.get('time')
+    h, m, s = map(int, time.split(":"))
+    time = datetime.time(h, m, s)
+
     date = datetime.datetime.combine(date=date, time=time)
     scheduler.add_job(
         start_fill_process,
