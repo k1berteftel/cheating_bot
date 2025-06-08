@@ -114,7 +114,9 @@ async def get_cookies(login: str, password: str) -> str:
             print('elem: \n', iframe)
             await iframe.locator("#js-button").wait_for(state="attached", timeout=10000)
 
-            box = await iframe.locator("#js-button").bounding_box()
+            box = iframe.locator("#js-button")
+            await box.wait_for(state="visible", timeout=10000)
+            box = await box.bounding_box()
             await page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
             await page.mouse.down()
             await page.mouse.up()
