@@ -65,7 +65,17 @@ async def add_fill_task(cookies: str, channel: str, volume: int, male: int, spee
 
 async def get_cookies(login: str, password: str) -> str:
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-infobars",
+                "--window-position=0,0",
+                "--window-size=1920,1080"
+            ]
+        )
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080},
@@ -80,7 +90,15 @@ async def get_cookies(login: str, password: str) -> str:
         page: Page = await context.new_page()
         await page.add_init_script("""
             delete navigator.__proto__.webdriver;
+            delete navigator.__proto__.__proto__.webdriver;
+            delete navigator.__proto__.chrome;
             window.chrome = {runtime: {}};
+            Object.defineProperty(navigator, 'navigator', {
+                value: {
+                    platform: 'Win32',
+                    appVersion: '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                }
+            });
         """)
         await page.goto("https://tmsmm.ru/login", wait_until="networkidle")
         init_url = page.url
