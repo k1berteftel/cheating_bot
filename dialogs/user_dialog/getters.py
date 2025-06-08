@@ -53,7 +53,7 @@ async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager
             args = job.args
             channel, volume, male, date = args[2], args[3], args[4], args[5]
             male = 'Мужская' if male == 'men' else 'Женская' if male == 'women' else 'Любая'
-            text += f'ID({job.id.split('_')[-1]}) <a href="{channel}">Канал</a>🔗|{volume} пдп ({male})|Запуск {date.strftime('%d-%m-%Y %H:%M')}\n'
+            text += f'ID({job.id.split("_")[-1]}) <a href="{channel}">Канал</a>🔗|{volume} пдп ({male})|Запуск {date.strftime("%d-%m-%Y %H:%M")}\n'
     return {'jobs': text if text else 'Отсутствуют'}
 
 
