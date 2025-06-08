@@ -127,6 +127,7 @@ async def get_cookies(login: str, password: str) -> str:
         if not passed:
             raise CaptchaError('Captcha pass error')
         print(init_url, final_url, sep='\n')
+
         if init_url == final_url:
             try:
                 os.remove(f'cookies/{name}.json')
