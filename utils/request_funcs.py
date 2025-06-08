@@ -1,41 +1,22 @@
 import asyncio
 import random
-
 import aiohttp
 import json
 import re
+import os
 
-from playwright.async_api import async_playwright, Page
+from playwright.async_api import async_playwright, Page, ProxySettings
 
-
-#url = 'https://tmsmm.ru/tasks/t1/add'
-
-
-async def fill_request(**kwargs):
-    #with open('cookies.json', 'r') as f:
-        #cookies = json.loads(f.read())[-1]
-    #print(cookies)
-    headers = {
-        'accept': '*/*',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.post('', headers=headers)as response:
-            print(response)
-            print(response.status)
-            print(await response.content.read())
-            print(await response.json())
+from utils.errors import CaptchaError, AuthError
+from utils.build_ids import get_random_id
 
 
-#asyncio.run(fill_request())
-
-
-async def add_fill_task(channel: str, volume: int, male: int, speed: int, sub_speed: int | None = None):
+async def add_fill_task(cookies: str, channel: str, volume: int, male: int, speed: int, sub_speed: int | None = None):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
 
-        with open('cookies.json', "r") as f:
+        with open(f'cookies/{cookies}', "r") as f:
             cookies = json.load(f)
         await context.add_cookies(cookies)
 
@@ -82,27 +63,76 @@ async def add_fill_task(channel: str, volume: int, male: int, speed: int, sub_sp
         await browser.close()
 
 
-async def save_cookies():
+async def get_cookies(login: str, password: str) -> str:
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context()
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080},
+            accept_downloads=True,
+        )
+        with open(f'static.json', "r") as f:
+            cookies = json.load(f)
+        await context.add_cookies(cookies)
 
         # Открытие страницы
+        passed = True
         page: Page = await context.new_page()
-        await page.goto("https://tmsmm.ru/panel")
+        await page.add_init_script("""
+            delete navigator.__proto__.webdriver;
+            window.chrome = {runtime: {}};
+        """)
+        await page.goto("https://tmsmm.ru/login", wait_until="networkidle")
+        init_url = page.url
 
-        await asyncio.sleep(100)
+        await asyncio.sleep(2)
 
-        # Получаем куки после авторизации
+        await page.fill('#iAuthEmail', value=login)
+        await asyncio.sleep(0.5)
+        await page.fill('#iAuthPassword', value=password)
+        await asyncio.sleep(2)
+        try:
+            iframe = page.frame_locator('iframe[src*="smartcaptcha"]').nth(1)
+            print('elem: \n', iframe)
+            await iframe.locator("#js-button").wait_for(state="attached", timeout=10000)
+
+            box = await iframe.locator("#js-button").bounding_box()
+            await page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+            await page.mouse.down()
+            await page.mouse.up()
+            await page.evaluate("""
+                const el = document.getElementById('js-button');
+                if (el) {
+                    el.setAttribute('aria-checked', 'true');
+                    el.click();
+                }
+            """)
+        except Exception as err:
+            print(err)
+            passed = False
+        await asyncio.sleep(2)
+        await page.evaluate("document.getElementById('bAuthLogin').click()")
+
+        await asyncio.sleep(8)
+
         cookies = await context.cookies()
-        print("Полученные cookies:", cookies)
-
-        # Сохраняем куки в файл
-        with open('cookies.json', "w") as f:
+        name = get_random_id()
+        with open(f'cookies/{name}.json', "w") as f:
             json.dump(cookies, f, indent=2)
 
+        final_url = page.url
         await context.close()
         await browser.close()
 
+        if not passed:
+            raise CaptchaError('Captcha pass error')
+        if init_url == final_url:
+            try:
+                os.remove(f'cookies/{name}.json')
+            except Exception:
+                ...
+            raise AuthError('Invalid login or password')
+        return f'{name}.json'
 
-#asyncio.run(add_fill_task(*format_data('ССылка', 121, 'men', 1)))
+
+#asyncio.run(get_cookies('kkulis985@gmail.com', '128hD8359'))

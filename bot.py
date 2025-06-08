@@ -13,6 +13,7 @@ from aiogram.enums import ParseMode
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
+from middlewares import TransferObjectsMiddleware
 from storage.nats_storage import NatsStorage
 from utils.nats_connect import connect_to_nats
 from database.build import PostgresBuild
@@ -46,10 +47,10 @@ config: Config = load_config()
 
 
 async def main():
-    #database = PostgresBuild(config.db.dns)
+    database = PostgresBuild(config.db.dns)
     #await database.drop_tables(Base)
     #await database.create_tables(Base)
-    #session = database.session()
+    session = database.session()
 
     #jobstores = {
         #'default': SQLAlchemyJobStore(config.db.dns)
@@ -66,13 +67,16 @@ async def main():
     # подключаем роутеры
     dp.include_routers(user_router, *get_dialogs())
 
+    # подключаем middleware
+    dp.update.middleware(TransferObjectsMiddleware())
+
     # запуск
     await bot.delete_webhook(drop_pending_updates=True)
     setup_dialogs(dp)
     logger.info('Bot start polling')
 
     try:
-        await dp.start_polling(bot, scheduler=scheduler)
+        await dp.start_polling(bot, _session=session, scheduler=scheduler)
     except Exception as e:
         logger.exception(e)
     finally:

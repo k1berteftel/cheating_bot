@@ -2,6 +2,18 @@ version: '3.8'
 
 services:
 
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: quest
+      POSTGRES_PASSWORD: quest
+      POSTGRES_DB: data
+    volumes:
+      - "01-simple-alchemy-postgres:/var/lib/postgresql/data"
+
   nats:
     image: nats:latest
     entrypoint: /nats-server
@@ -12,3 +24,6 @@ services:
     volumes:
       - ./nats/data:/data
       - ./nats/config/server.conf:/config/server.conf
+
+volumes:
+  01-simple-alchemy-postgres:

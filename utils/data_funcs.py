@@ -16,9 +16,10 @@ def get_sub_groups(volume: int, mode: Literal['morning', 'evening']) -> list[int
 
 def collect_fill_group(group: list[int]):
     sum = 0
+    count = 0
     del_indexes = []
     for i in range(0, len(group)):
-        if group[i] < 10:
+        if group[i] < 10 and sum < 10:
             sum += group[i]
             del_indexes.append(i)
         else:
@@ -60,4 +61,10 @@ def _get_custom_speed(volume: int, count: int) -> int:
     return math.ceil(count * 60 / volume)
 
 
+def check_remains_sum(group: list[int]) -> bool | int:
+    remain = sum(group[1::])
+    if remain > 10:
+        return True
+    volume = group[0] + remain
+    return volume
 

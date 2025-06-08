@@ -12,26 +12,116 @@ user_dialog = Dialog(
     Window(
         Const('Главное меню'),
         Column(
-            SwitchTo(Const('Начать накрутку'), id='get_channel_switcher', state=startSG.get_channel),
-            #SwitchTo(Const('Отложенные задачи'), id='deferred_tasks_menu', state=startSG.deferred_tasks_menu),
+            SwitchTo(Const('Выбрать аккаунт'), id='choose_account_switcher', state=startSG.account_choose, when='accounts'),
+            SwitchTo(Const('Добавить аккаунт'), id='get_login_switcher', state=startSG.get_login),
+            SwitchTo(Const('Удалить аккаунт'), id='del_account_switcher', state=startSG.del_account),
         ),
+        getter=getters.start_getter,
         state=startSG.start
     ),
-    #Window(Const()),
+    Window(
+        Const('Введите логин аккаунта'),
+        TextInput(
+            id='get_login',
+            on_success=getters.get_login
+        ),
+        SwitchTo(Const('Назад'), id='back', state=startSG.start),
+        state=startSG.get_login
+    ),
+    Window(
+        Const('Введите пароль от аккаунта'),
+        TextInput(
+            id='get_password',
+            on_success=getters.get_password
+        ),
+        SwitchTo(Const('Назад'), id='back_get_login', state=startSG.get_login),
+        state=startSG.get_password
+    ),
+    Window(
+        Const('Введите название для аккаунта'),
+        TextInput(
+            id='get_account_name',
+            on_success=getters.get_account_name
+        ),
+        SwitchTo(Const('Назад'), id='back_get_password', state=startSG.get_password),
+        state=startSG.get_account_name
+    ),
+    Window(
+        Const('Выберите аккаунт, который вы хотели бы удалить'),
+        Column(
+            Select(
+                Format('{item[0]}'),
+                id='del_accounts_builder',
+                item_id_getter=lambda x: x[1],
+                items='items',
+                on_click=getters.choose_account_del
+            ),
+        ),
+        SwitchTo(Const('Назад'), id='back', state=startSG.start),
+        getter=getters.del_account_getter,
+        state=startSG.del_account
+    ),
+    Window(
+        Const('Выберите аккаунт, на который вы хотели бы зайти'),
+        Column(
+            Select(
+                Format('{item[0]}'),
+                id='accounts_builder',
+                item_id_getter=lambda x: x[1],
+                items='items',
+                on_click=getters.choose_account
+            ),
+        ),
+        SwitchTo(Const('Назад'), id='back', state=startSG.start),
+        getter=getters.choose_account_getter,
+        state=startSG.account_choose
+    ),
+    Window(
+        Const('Главное меню'),
+        Column(
+            SwitchTo(Const('Начать накрутку'), id='get_channel_switcher', state=startSG.get_channel),
+            SwitchTo(Const('Отложенные задачи'), id='deferred_tasks_menu', state=startSG.tasks_menu),
+        ),
+        SwitchTo(Const('Назад'), id='back', state=startSG.start),
+        state=startSG.cheating_menu
+    ),
+    Window(
+        Const('Список отложенных задач:'),
+        Format('{jobs}'),
+        SwitchTo(Const('Отключить задачу'), id='disable_task_switcher', state=startSG.disable_task),
+        SwitchTo(Const('Назад'), id='back_cheating_menu', state=startSG.cheating_menu),
+        getter=getters.tasks_menu_getter,
+        state=startSG.tasks_menu
+    ),
+    Window(
+        Const('Выберите задачу, которую вы хотели бы удалить'),
+        Column(
+            Select(
+                Format('{item[0]}'),
+                id='jobs_builder',
+                item_id_getter=lambda x: x[1],
+                items='items',
+                on_click=getters.choose_job_del
+            ),
+        ),
+        SwitchTo(Const('Назад'), id='back_tasks_menu', state=startSG.tasks_menu),
+        getter=getters.disable_task_getter,
+        state=startSG.disable_task
+    ),
     Window(
         Const('Введите ссылку на канал'),
         TextInput(
             id='get_channel',
             on_success=getters.get_channel
         ),
-        SwitchTo(Const('Назад'), id='back', state=startSG.start),
+        SwitchTo(Const('Назад'), id='back_cheating_menu', state=startSG.cheating_menu),
         state=startSG.get_channel
     ),
     Window(
         Const('Введите общее кол-во человек для накрутки'),
         TextInput(
             id='get_volume',
-            on_success=getters.get_volume # не меньше 10
+            on_success=getters.get_volume
         ),
         SwitchTo(Const('Назад'), id='back_get_channel', state=startSG.get_channel),
         state=startSG.get_volume

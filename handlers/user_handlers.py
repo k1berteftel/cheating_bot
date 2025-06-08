@@ -10,5 +10,6 @@ user_router = Router()
 
 
 @user_router.message(CommandStart())
-async def start_dialog(msg: Message, dialog_manager: DialogManager):
+async def start_dialog(msg: Message, dialog_manager: DialogManager, session: DataInteraction):
+    await session.add_user(msg.from_user.id)
     await dialog_manager.start(state=startSG.start, mode=StartMode.RESET_STACK)
