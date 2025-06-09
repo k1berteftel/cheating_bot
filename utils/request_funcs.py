@@ -66,7 +66,7 @@ async def add_fill_task(cookies: str, channel: str, volume: int, male: int, spee
 async def get_cookies(login: str, password: str) -> str:
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            headless=False,
+            headless=True,
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
