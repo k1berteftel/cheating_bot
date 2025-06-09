@@ -12,54 +12,9 @@ user_dialog = Dialog(
     Window(
         Const('Главное меню'),
         Column(
-            SwitchTo(Const('Выбрать аккаунт'), id='choose_account_switcher', state=startSG.account_choose, when='accounts'),
-            SwitchTo(Const('Добавить аккаунт'), id='get_login_switcher', state=startSG.get_login),
-            SwitchTo(Const('Удалить аккаунт'), id='del_account_switcher', state=startSG.del_account),
+            SwitchTo(Const('Выбрать аккаунт'), id='choose_account_switcher', state=startSG.account_choose),
         ),
-        getter=getters.start_getter,
         state=startSG.start
-    ),
-    Window(
-        Const('Введите логин аккаунта'),
-        TextInput(
-            id='get_login',
-            on_success=getters.get_login
-        ),
-        SwitchTo(Const('Назад'), id='back', state=startSG.start),
-        state=startSG.get_login
-    ),
-    Window(
-        Const('Введите пароль от аккаунта'),
-        TextInput(
-            id='get_password',
-            on_success=getters.get_password
-        ),
-        SwitchTo(Const('Назад'), id='back_get_login', state=startSG.get_login),
-        state=startSG.get_password
-    ),
-    Window(
-        Const('Введите название для аккаунта'),
-        TextInput(
-            id='get_account_name',
-            on_success=getters.get_account_name
-        ),
-        SwitchTo(Const('Назад'), id='back_get_password', state=startSG.get_password),
-        state=startSG.get_account_name
-    ),
-    Window(
-        Const('Выберите аккаунт, который вы хотели бы удалить'),
-        Column(
-            Select(
-                Format('{item[0]}'),
-                id='del_accounts_builder',
-                item_id_getter=lambda x: x[1],
-                items='items',
-                on_click=getters.choose_account_del
-            ),
-        ),
-        SwitchTo(Const('Назад'), id='back', state=startSG.start),
-        getter=getters.del_account_getter,
-        state=startSG.del_account
     ),
     Window(
         Const('Выберите аккаунт, на который вы хотели бы зайти'),

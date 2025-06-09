@@ -11,15 +11,15 @@ from utils.request_funcs import add_fill_task
 from utils.data_funcs import get_sub_groups, collect_fill_group, format_data, check_remains_sum
 
 
-async def start_fill_process(account_id: int, user_id: int, channel: str, volume: int, male: str, date: datetime, bot: Bot, session: DataInteraction, scheduler: AsyncIOScheduler):
+async def start_fill_process(account: str, user_id: int, channel: str, volume: int, male: str, date: datetime, bot: Bot, session: DataInteraction, scheduler: AsyncIOScheduler):
     await bot.send_message(
         chat_id=user_id,
         text='Процесс накрутки был успешно запущен'
     )
     group = get_sub_groups(volume, 'morning' if date.hour == 10 else 'evening')
     print(group)
-    account = await session.get_account(account_id)
-    await fill_queue(account.cookies, group, channel, male, date, scheduler)
+    cookies = account + '.json'
+    await fill_queue(cookies, group, channel, male, date, scheduler)
 
 
 async def fill_queue(cookies: str, group: list[int], channel: str, male: str, time: datetime, scheduler: AsyncIOScheduler):
