@@ -72,6 +72,8 @@ async def get_cookies(login: str, password: str) -> str:
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-infobars",
+                "--disable-dev-shm-usage",
+                "--no-first-run",
                 "--window-position=0,0",
                 "--window-size=1920,1080"
             ]
