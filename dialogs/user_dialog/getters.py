@@ -159,5 +159,5 @@ async def add_task(clb: CallbackQuery, widget: Button, dialog_manager: DialogMan
     )
     await clb.message.answer('Задача накрутки была успешно добавлена')
     dialog_manager.dialog_data.clear()
-    dialog_manager.dialog_data['account_id'] = account_id
+    dialog_manager.dialog_data['account'] = account
     await dialog_manager.switch_to(startSG.cheating_menu)
