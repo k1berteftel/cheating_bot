@@ -66,7 +66,7 @@ async def add_fill_task(cookies: str, channel: str, volume: int, male: int, spee
 async def get_cookies(login: str, password: str) -> str:
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
@@ -86,6 +86,7 @@ async def get_cookies(login: str, password: str) -> str:
         await context.add_cookies(cookies)
 
         # Открытие страницы
+        log = True
         passed = True
         page: Page = await context.new_page()
         await page.add_init_script("""
@@ -96,7 +97,7 @@ async def get_cookies(login: str, password: str) -> str:
             Object.defineProperty(navigator, 'navigator', {
                 value: {
                     platform: 'Win32',
-                    appVersion: '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                    appVersion: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
                 }
             });
         """)
@@ -132,6 +133,17 @@ async def get_cookies(login: str, password: str) -> str:
             passed = False
         await asyncio.sleep(2)
         await page.evaluate("document.getElementById('bAuthLogin').click()")
+        try:
+            locator = page.locator('.alert-danger')
+            await locator.wait_for(timeout=10000)
+            alert = await locator.text_content()
+            print(alert)
+            if alert.strip() == 'Поставьте галочку на против текста "Я не робот".':
+                passed = False
+            if alert.strip() == 'Не удается войти.':
+                log = False
+        except Exception as err:
+            print(err)
 
         await asyncio.sleep(8)
 
@@ -148,7 +160,7 @@ async def get_cookies(login: str, password: str) -> str:
             raise CaptchaError('Captcha pass error')
         print(init_url, final_url, sep='\n')
 
-        if init_url == final_url:
+        if init_url == final_url and not log:
             try:
                 os.remove(f'cookies/{name}.json')
             except Exception:
