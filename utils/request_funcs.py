@@ -5,7 +5,7 @@ import json
 import re
 import os
 
-from playwright.async_api import async_playwright, Page, ProxySettings
+from playwright.async_api import async_playwright, Page
 
 
 async def add_fill_task(cookies: str, channel: str, volume: int, male: int, speed: int, sub_speed: int | None = None):
