@@ -24,7 +24,7 @@ async def start_fill_process(account: str, user_id: int, channel: str, volume: i
 
 async def fill_queue(cookies: str, group: list[int], channel: str, male: str, time: datetime, scheduler: AsyncIOScheduler):
     result = check_remains_sum(group)
-    if isinstance(result, int):
+    if type(result) == int:
         hours = len(group)
         group = []
         await add_fill_task(cookies, *format_data(channel, result, male, hours))
