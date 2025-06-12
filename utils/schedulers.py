@@ -45,7 +45,7 @@ async def fill_queue(cookies: str, group: list[int], channel: str, male: str, ti
     scheduler.add_job(
         fill_queue,
         args=[cookies, group, channel, male, time, scheduler],
-        next_run_time=time
+        #next_run_time=time
     )
 
 
