@@ -52,7 +52,7 @@ async def add_fill_task(cookies: str, channel: str, volume: int, male: int, spee
         await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalBefore', str(9))
         await asyncio.sleep(1)
 
-        #await page.click('#bSocialCreateOrder', button='left')
+        await page.click('#bSocialCreateOrder', button='left')
 
         await asyncio.sleep(5)
 

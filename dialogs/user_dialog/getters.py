@@ -154,7 +154,7 @@ async def add_task(clb: CallbackQuery, widget: Button, dialog_manager: DialogMan
     scheduler.add_job(
         start_fill_process,
         args=[account, clb.from_user.id, channel, volume, male, date, bot, scheduler],
-        #next_run_time=date,
+        next_run_time=date,
         id=job_id
     )
     await clb.message.answer('Задача накрутки была успешно добавлена')

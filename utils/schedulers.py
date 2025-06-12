@@ -19,6 +19,7 @@ async def start_fill_process(account: str, user_id: int, channel: str, volume: i
     group = get_sub_groups(volume, 'morning' if date.hour == 10 else 'evening')
     print(group)
     cookies = account + '.json'
+    print(cookies)
     await fill_queue(cookies, group, channel, male, date, scheduler)
 
 
@@ -45,7 +46,7 @@ async def fill_queue(cookies: str, group: list[int], channel: str, male: str, ti
     scheduler.add_job(
         fill_queue,
         args=[cookies, group, channel, male, time, scheduler],
-        #next_run_time=time
+        next_run_time=time
     )
 
 
