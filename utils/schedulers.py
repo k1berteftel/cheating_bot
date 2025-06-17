@@ -117,6 +117,49 @@ async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str,
             args=[cookies, channel, 45, male, 5, 4],
             next_run_time=date.replace(hour=6, minute=30, day=date.day+1)
         )
+    elif 1300 < sum(group) <= 1600:
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 20, male, 0],
+            next_run_time=date.replace(hour=22)
+        )
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 15, male, 0],
+            next_run_time=date.replace(hour=23)
+        )
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 10, male, 5, 6],
+            next_run_time=date.replace(hour=0, day=date.day+1)
+        )
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 10, male, 5, 7],
+            next_run_time=date.replace(hour=1, day=date.day+1)
+        )
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 10, male, 5, 12],
+            next_run_time=date.replace(hour=3, day=date.day+1)
+        )
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 30, male, 5, 2],
+            next_run_time=date.replace(hour=5, minute=35, day=date.day+1)
+        )
+        scheduler.add_job(
+            add_fill_task,
+            'interval',
+            args=[cookies, channel, 30, male, 0],
+            next_run_time=date.replace(hour=7, day=date.day+1)
+        )
     new_date = date.replace(hour=8, day=date.day + 1)
     new_group = group[-2::] if date.hour == 10 else group[14::]
     print('c 8 до остатка ', new_group)
