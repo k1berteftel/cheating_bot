@@ -1,5 +1,8 @@
+import datetime
 import math
+import random
 from typing import Literal
+
 
 morning = [29, 14, 9, 6, 5, 4, 2.5, 3, 4, 3, 3, 2, 1.5, 1, 0.75, 0.5, 0.25, 0.5, 1, 1, 1.5, 2.5, 3, 2]
 
@@ -16,7 +19,6 @@ def get_sub_groups(volume: int, mode: Literal['morning', 'evening']) -> list[int
 
 def collect_fill_group(group: list[int]):
     sum = 0
-    count = 0
     del_indexes = []
     for i in range(0, len(group)):
         if group[i] < 10 and sum < 10:
@@ -68,3 +70,49 @@ def check_remains_sum(group: list[int]) -> bool | int:
     volume = group[0] + remain
     return volume
 
+
+def _test_fill():
+    limits = [300, 400, 500, 700]
+    date = datetime.date.today()
+    time = datetime.time(hour=10, minute=00)
+    time = datetime.datetime.combine(date=date, time=time)
+    for volume in limits:
+        fill_imitation(volume, time)
+
+
+def fill_imitation(count: int, time: datetime.datetime):
+    import datetime
+    speeds = {
+        0: 'Очень медленная (30 пдп в час)',
+        1: 'Медленная (60 пдп в час)',
+        2: 'Средняя (180 пдп в час)',
+        3: 'Быстрая (300 пдп в час)',
+        4: 'Очень быстрая (600 пдп в час)'
+    }
+    print(f'Залив для {count} пдп')
+    group = get_sub_groups(count, 'morning')
+    print(group)
+    while len(group) != 0:
+        print('Время: ', time.strftime("%Y-%m-%d %H:%M:%S"))
+        result = check_remains_sum(group)
+        if type(result) == int:
+            hours = len(group)
+            group = []
+            data = format_data('', result, 'men', hours)
+        elif group[0] < 10:
+            old_len = len(group)
+            group, volume = collect_fill_group(group)
+            new_len = len(group)
+            time += datetime.timedelta(hours=old_len - new_len)
+            data = format_data('', volume, 'men', old_len - new_len)
+        else:
+            volume = group.pop(0)
+            time += datetime.timedelta(hours=1)
+            data = format_data('', volume, 'men')
+        print('Кол-во пдп:', data[1], '| Скорость залива:',
+              speeds[data[3]] if data[3] in range(0, 5) else f'1 пдп в {data[4]} минут')
+
+    print('\n\n')
+
+
+#_test_fill()

@@ -8,6 +8,7 @@ from aiogram_dialog.widgets.kbd import Button, Select, ManagedCalendar
 from aiogram_dialog.widgets.input import ManagedTextInput
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from utils.request_funcs import get_account_balance
 from utils.schedulers import start_fill_process
 from utils.build_ids import get_random_id
 from database.model import AccountsTable
@@ -72,6 +73,12 @@ async def choose_account_getter(event_from_user: User, dialog_manager: DialogMan
 async def choose_account(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
     dialog_manager.dialog_data['account'] = accounts[int(item_id)]
     await dialog_manager.switch_to(startSG.cheating_menu)
+
+
+async def cheating_menu_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
+    account = dialog_manager.dialog_data.get('account')
+    balance = await get_account_balance(account + '.json')
+    return {'balance': str(balance) + ' Р' if balance else '<em>Ошибка при сборе ин-фо</em>'}
 
 
 async def get_channel(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):

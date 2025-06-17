@@ -60,6 +60,29 @@ async def add_fill_task(cookies: str, channel: str, volume: int, male: int, spee
         await browser.close()
 
 
+async def get_account_balance(cookies: str) -> float | None:
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+
+        with open(f'cookies/{cookies}', "r") as f:
+            cookies = json.load(f)
+        await context.add_cookies(cookies)
+
+        page = await context.new_page()
+        await page.goto('https://tmsmm.ru/panel')
+
+        try:
+            await page.wait_for_selector("b.ym-hide-content")
+            balance = await page.text_content("b.ym-hide-content")
+        except Exception as err:
+            print(err)
+            return None
+        await context.close()
+        await browser.close()
+        return float(balance)
+
+
 async def get_cookies(name: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch(

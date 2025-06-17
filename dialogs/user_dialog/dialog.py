@@ -33,11 +33,13 @@ user_dialog = Dialog(
     ),
     Window(
         Const('Главное меню'),
+        Format('Баланс аккаунта: {balance}'),
         Column(
             SwitchTo(Const('Начать накрутку'), id='get_channel_switcher', state=startSG.get_channel),
             SwitchTo(Const('Отложенные задачи'), id='deferred_tasks_menu', state=startSG.tasks_menu),
         ),
         SwitchTo(Const('Назад'), id='back', state=startSG.start),
+        getter=getters.cheating_menu_getter,
         state=startSG.cheating_menu
     ),
     Window(
