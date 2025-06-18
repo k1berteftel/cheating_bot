@@ -21,7 +21,7 @@ def collect_fill_group(group: list[int]):
     sum = 0
     del_indexes = []
     for i in range(0, len(group)):
-        if group[i] < 10 and sum < 10:
+        if (group[i] < 10 and sum < 10) or (len(group[i::]) == 1 and group[i] < 10):
             sum += group[i]
             del_indexes.append(i)
         else:
@@ -74,7 +74,7 @@ def check_remains_sum(group: list[int]) -> bool | int:
 def _test_fill():
     limits = [300, 400, 500, 700]
     date = datetime.date.today()
-    time = datetime.time(hour=10, minute=00)
+    time = datetime.time(hour=18, minute=00)
     time = datetime.datetime.combine(date=date, time=time)
     for volume in limits:
         fill_imitation(volume, time)
@@ -90,29 +90,34 @@ def fill_imitation(count: int, time: datetime.datetime):
         4: 'Очень быстрая (600 пдп в час)'
     }
     print(f'Залив для {count} пдп')
-    group = get_sub_groups(count, 'morning')
-    print(group)
-    while len(group) != 0:
-        print('Время: ', time.strftime("%Y-%m-%d %H:%M:%S"))
-        result = check_remains_sum(group)
-        if type(result) == int:
-            hours = len(group)
-            group = []
-            data = format_data('', result, 'men', hours)
-        elif group[0] < 10:
-            old_len = len(group)
-            group, volume = collect_fill_group(group)
-            new_len = len(group)
-            time += datetime.timedelta(hours=old_len - new_len)
-            data = format_data('', volume, 'men', old_len - new_len)
-        else:
-            volume = group.pop(0)
-            time += datetime.timedelta(hours=1)
-            data = format_data('', volume, 'men')
-        print('Кол-во пдп:', data[1], '| Скорость залива:',
-              speeds[data[3]] if data[3] in range(0, 5) else f'1 пдп в {data[4]} минут')
+    counter = 0
+    group = get_sub_groups(count, 'evening')
+    print(group[14::])
 
+    for group in [group[0:4], group[14::]]:
+        if counter == 1:
+            time = time.replace(hour=8)
+        while len(group) != 0:
+            print('Время: ', time.strftime("%Y-%m-%d %H:%M:%S"))
+            result = check_remains_sum(group)
+            if type(result) == int:
+                hours = len(group)
+                group = []
+                data = format_data('', result, 'men', hours)
+            elif group[0] < 10:
+                old_len = len(group)
+                group, volume = collect_fill_group(group)
+                new_len = len(group)
+                time += datetime.timedelta(hours=old_len - new_len)
+                data = format_data('', volume, 'men', old_len - new_len)
+            else:
+                volume = group.pop(0)
+                time += datetime.timedelta(hours=1)
+                data = format_data('', volume, 'men')
+            print('Кол-во пдп:', data[1], f'({round(data[1] / count * 100)} %)', '| Скорость залива:',
+                  speeds[data[3]] if data[3] in range(0, 5) else f'1 пдп в {data[4]} минут')
+        counter += 1
     print('\n\n')
 
 
-#_test_fill()
+_test_fill()
