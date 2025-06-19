@@ -65,8 +65,9 @@ def _get_custom_speed(volume: int, count: int) -> int:
 
 def check_remains_sum(group: list[int]) -> bool | int:
     remain = sum(group[1::])
-    if remain > 10:
+    if remain >= 10 or len(group) == 1:
         return True
+    print(group[1::])
     volume = group[0] + remain
     return volume
 
@@ -99,8 +100,10 @@ def fill_imitation(count: int, time: datetime.datetime):
             time = time.replace(hour=8)
         while len(group) != 0:
             print('Время: ', time.strftime("%Y-%m-%d %H:%M:%S"))
+            print(group)
             result = check_remains_sum(group)
             if type(result) == int:
+                print('remains sum')
                 hours = len(group)
                 group = []
                 data = format_data('', result, 'men', hours)
