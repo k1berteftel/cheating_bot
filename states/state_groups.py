@@ -19,3 +19,4 @@ class startSG(StatesGroup):
     confirm_task = State()
     tasks_menu = State()
     disable_task = State()
+    job_menu = State()

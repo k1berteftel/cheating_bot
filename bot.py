@@ -58,11 +58,11 @@ async def main():
     scheduler: AsyncIOScheduler = AsyncIOScheduler()  #jobstores=jobstores
     scheduler.start()
 
-    nc, js = await connect_to_nats(servers=config.nats.servers)
-    storage: NatsStorage = await NatsStorage(nc=nc, js=js).create_storage()
+    #nc, js = await connect_to_nats(servers=config.nats.servers)
+    #storage: NatsStorage = await NatsStorage(nc=nc, js=js).create_storage()
 
     bot = Bot(token=config.bot.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    dp = Dispatcher(storage=storage)
+    dp = Dispatcher()#storage=storage)
 
     # подключаем роутеры
     dp.include_routers(user_router, *get_dialogs())
@@ -74,13 +74,12 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     setup_dialogs(dp)
     logger.info('Bot start polling')
-
     try:
         await dp.start_polling(bot, _session=session, scheduler=scheduler)
     except Exception as e:
         logger.exception(e)
     finally:
-        await nc.close()
+        #await nc.close()
         logger.info('Connection closed')
 
 

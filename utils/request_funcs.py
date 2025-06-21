@@ -34,9 +34,6 @@ class Order(BaseModel):
     create: datetime
 
 
-
-
-
 async def add_fill_task(cookies: str, channel: str, volume: int, male: int, date: datetime, speed: int, sub_speed: int | None = None):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -74,18 +71,18 @@ async def add_fill_task(cookies: str, channel: str, volume: int, male: int, date
                 }
             }"""
         )
-        await page.fill('#iTaskT1BackendUnSubscribingPercentageOfUnSubscribes', str(random.randint(5, 7)))
+        await page.fill('#iTaskT1BackendUnSubscribingPercentageOfUnSubscribes', str(random.randint(7, 10)))
         await asyncio.sleep(0.2)
-        await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalFrom', str(3))
+        await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalFrom', str(1))
         await asyncio.sleep(0.2)
-        await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalBefore', str(9))
+        await page.fill('#iTaskT1BackendUnSubscribingSpeedIntervalBefore', str(3))
         await asyncio.sleep(1)
 
         await page.click("label[for='cTaskT1TimeStart']")
         await asyncio.sleep(1)
         await page.fill('#iTaskT1TimeStart', date.strftime('%d.%m.%Y %H:%M'))
         await asyncio.sleep(0.5)
-        #await page.click('#bSocialCreateOrder', button='left')
+        await page.click('#bSocialCreateOrder', button='left')
 
         await asyncio.sleep(5)
 
@@ -106,13 +103,14 @@ async def get_account_balance(cookies: str) -> float | None:
 
         page = await context.new_page()
         await page.goto('https://tmsmm.ru/panel')
-
+        await asyncio.sleep(0.5)
         try:
             await page.wait_for_selector("b.ym-hide-content")
             balance = await page.text_content("b.ym-hide-content")
         except Exception as err:
             print(err)
             return None
+        await asyncio.sleep(5)
         await context.close()
         await browser.close()
         return float(balance)
@@ -140,13 +138,11 @@ async def get_account_jobs(cookies: str) -> list[Order]:
             if not tasks:
                 break
             for task in tasks:
-                print('Страница', i)
                 obj_type = task.find('h5', class_='m-t-0').find('a', href=True)['href'].strip()
                 if '/followers/1' not in obj_type:
                     continue
                 objects = task.find_all('h5', class_='m-t-5')
                 price = float(task.find_all('h5', class_='ym-hide-content')[6].find('span').find('span').text.strip().split(' ')[0])
-                print(price)
                 time = objects[13].find('span').text.split(':', maxsplit=1)[1].strip()
                 jobs.append(
                     dict(
@@ -167,6 +163,50 @@ async def get_account_jobs(cookies: str) -> list[Order]:
         await browser.close()
     jobs = [Order.model_validate(job) for job in jobs]
     return jobs
+
+
+async def turn_off_job(cookies: str, job_id: str, job_page: int) -> bool:
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+
+        with open(f'cookies/{cookies}', "r") as f:
+            cookies = json.load(f)
+        await context.add_cookies(cookies)
+
+        page = await context.new_page()
+        await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={job_page}')
+        await asyncio.sleep(1.5)
+        try:
+            await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=400.00)
+            await page.click(f'#bTaskT1Delete_{job_id}', button='left')
+        except Exception as err_1:
+            print(err_1)
+            try:
+                await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=400.00)
+                await page.click(f'#bTaskT1Cancel_{job_id}')
+            except Exception as err_2:
+                print(err_2)
+                await context.close()
+                await browser.close()
+                return False
+        await asyncio.sleep(1)
+        try:
+            await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=400.00)
+            await page.click(f'#bTaskT1Delete_{job_id}', button='left')
+        except Exception as err_1:
+            print('step 2', err_1)
+            try:
+                await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=400.00)
+                await page.click(f'#bTaskT1Cancel_{job_id}')
+            except Exception as err_2:
+                print('step 2', err_2)
+                await context.close()
+                await browser.close()
+                return False
+        await context.close()
+        await browser.close()
+        return True
 
 
 async def get_cookies(name: str):

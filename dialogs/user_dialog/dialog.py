@@ -43,27 +43,32 @@ user_dialog = Dialog(
         state=startSG.cheating_menu
     ),
     Window(
-        Const('Список отложенных задач:'),
-        Format('{jobs}'),
-        SwitchTo(Const('Отключить задачу'), id='disable_task_switcher', state=startSG.disable_task),
-        SwitchTo(Const('Назад'), id='back_cheating_menu', state=startSG.cheating_menu),
-        getter=getters.tasks_menu_getter,
-        state=startSG.tasks_menu
-    ),
-    Window(
-        Const('Выберите задачу, которую вы хотели бы удалить'),
-        Column(
+        Const('Выберите задачу и нажмите на нее, чтобы просмотреть ее подробнее'),
+        Group(
             Select(
                 Format('{item[0]}'),
                 id='jobs_builder',
                 item_id_getter=lambda x: x[1],
                 items='items',
-                on_click=getters.choose_job_del
+                on_click=getters.job_selector
             ),
+            width=2
         ),
+        Row(
+            Button(Const('◀️'), id='previous_page', on_click=getters.jobs_pager, when='not_first'),
+            Button(Format('{pages}'), id='pager'),
+            Button(Const('▶️'), id='next_page', on_click=getters.jobs_pager, when='not_last'),
+        ),
+        SwitchTo(Const('Назад'), id='back_cheating_menu', state=startSG.cheating_menu),
+        getter=getters.tasks_menu_getter,
+        state=startSG.tasks_menu
+    ),
+    Window(
+        Format('{text}'),
+        Button(Const('Отключить задачу'), id='disable_task', on_click=getters.disable_job),
         SwitchTo(Const('Назад'), id='back_tasks_menu', state=startSG.tasks_menu),
-        getter=getters.disable_task_getter,
-        state=startSG.disable_task
+        getter=getters.job_menu_getter,
+        state=startSG.job_menu
     ),
     Window(
         Const('Введите ссылку на канал'),
