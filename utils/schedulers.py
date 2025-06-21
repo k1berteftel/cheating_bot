@@ -11,7 +11,7 @@ from utils.request_funcs import add_fill_task
 from utils.data_funcs import get_sub_groups, collect_fill_group, format_data, check_remains_sum
 
 
-async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str, scheduler: AsyncIOScheduler, date: datetime) -> list[int]:
+async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str, date: datetime) -> list[int]:
     males = {
         'any': 0,
         'women': 1,
@@ -19,160 +19,41 @@ async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str,
     }
     male = males[male_d]
     if 300 <= sum(group) < 650:
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 12, male, 5, 8],
-            next_run_time=date.replace(hour=22)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 21],
-            next_run_time=date.replace(hour=0, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 10],
-            next_run_time=date.replace(hour=4, minute=20, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 20, male, 5, 5],
-            next_run_time=date.replace(hour=6, minute=25, day=date.day+1)
-        )
+        await add_fill_task(cookies, channel, 12, male, date.replace(hour=22), 5, 8)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=0, day=date.day+1), 5, 21)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=4, minute=20, day=date.day+1), 5, 10)
+        await add_fill_task(cookies, channel, 20, male, date.replace(hour=6, minute=25, day=date.day+1), 5, 5)
     elif 650 <= sum(group) <= 1000:
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 20, male, 5, 6],
-            next_run_time=date.replace(hour=22)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 10],
-            next_run_time=date.replace(hour=0, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 15],
-            next_run_time=date.replace(hour=2, minute=29, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 11, male, 0],
-            next_run_time=date.replace(hour=5, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 13, male, 0],
-            next_run_time=date.replace(hour=6, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 20, male, 0],
-            next_run_time=date.replace(hour=7, day=date.day+1)
-        )
+        await add_fill_task(cookies, channel, 20, male, date.replace(hour=22), 5, 6)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=0, day=date.day+1), 5, 10)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=2, minute=29, day=date.day+1), 5, 15)
+        await add_fill_task(cookies, channel, 11, male, date.replace(hour=5, day=date.day+1), 0)
+        await add_fill_task(cookies, channel, 13, male, date.replace(hour=6, day=date.day+1), 0)
+        await add_fill_task(cookies, channel, 20, male, date.replace(hour=7, day=date.day+1), 0)
     elif 1000 < sum(group) <= 1300:
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 18, male, 0],
-            next_run_time=date.replace(hour=22)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 12, male, 0],
-            next_run_time=date.replace(hour=23)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 14, male, 5, 7],
-            next_run_time=date.replace(hour=0, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 10],
-            next_run_time=date.replace(hour=2, minute=19, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 24, male, 5, 3],
-            next_run_time=date.replace(hour=4, minute=30, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 45, male, 5, 4],
-            next_run_time=date.replace(hour=6, minute=30, day=date.day+1)
-        )
+        await add_fill_task(cookies, channel, 18, male, date.replace(hour=22), 0)
+        await add_fill_task(cookies, channel, 12, male, date.replace(hour=23), 0)
+        await add_fill_task(cookies, channel, 14, male, date.replace(hour=0, day=date.day+1), 5, 7)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=2, minute=19, day=date.day+1), 5, 10)
+        await add_fill_task(cookies, channel, 24, male, date.replace(hour=4, minute=30, day=date.day+1), 5, 3)
+        await add_fill_task(cookies, channel, 45, male, date.replace(hour=6, minute=30, day=date.day+1), 5, 4)
     elif 1300 < sum(group) <= 1600:
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 20, male, 0],
-            next_run_time=date.replace(hour=22)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 15, male, 0],
-            next_run_time=date.replace(hour=23)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 6],
-            next_run_time=date.replace(hour=0, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 7],
-            next_run_time=date.replace(hour=1, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 10, male, 5, 12],
-            next_run_time=date.replace(hour=3, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 30, male, 5, 2],
-            next_run_time=date.replace(hour=5, minute=35, day=date.day+1)
-        )
-        scheduler.add_job(
-            add_fill_task,
-            'interval',
-            args=[cookies, channel, 30, male, 0],
-            next_run_time=date.replace(hour=7, day=date.day+1)
-        )
+        await add_fill_task(cookies, channel, 20, male, date.replace(hour=22), 0)
+        await add_fill_task(cookies, channel, 15, male, date.replace(hour=23), 0)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=0, day=date.day+1), 5, 6)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=1, day=date.day+1), 5, 7)
+        await add_fill_task(cookies, channel, 10, male, date.replace(hour=3, day=date.day+1), 5, 12)
+        await add_fill_task(cookies, channel, 30, male, date.replace(hour=5, minute=35, day=date.day+1), 5, 2)
+        await add_fill_task(cookies, channel, 30, male, date.replace(hour=7, day=date.day+1), 0)
     new_date = date.replace(hour=8, day=date.day + 1)
     new_group = group[-2::] if date.hour == 10 else group[14::]
     print('c 8 до остатка ', new_group)
-    scheduler.add_job(
-        fill_queue,
-        args=[cookies, new_group, channel, male_d, new_date, scheduler],
-        next_run_time=new_date
-    )
+    await fill_queue(cookies, new_group, channel, male_d, new_date)
     group = group[:12:] if date.hour == 10 else group[0:4]
     return group
 
 
-async def start_fill_process(account: str, user_id: int, channel: str, volume: int, male: str, date: datetime, bot: Bot, scheduler: AsyncIOScheduler):
+async def start_fill_process(account: str, user_id: int, channel: str, volume: int, male: str, date: datetime, bot: Bot):
     await bot.send_message(
         chat_id=user_id,
         text='Процесс накрутки был успешно запущен'
@@ -181,13 +62,13 @@ async def start_fill_process(account: str, user_id: int, channel: str, volume: i
     print(group)
     cookies = account + '.json'
     print(cookies)
-    if 300 <= sum(group) <= 1300:
-        group = await sort_groups(channel, cookies, group, male, scheduler, date)
+    if 300 <= sum(group) <= 1600:
+        group = await sort_groups(channel, cookies, group, male, date)
     print('до 22 ', group)
-    await fill_queue(cookies, group, channel, male, date, scheduler)
+    await fill_queue(cookies, group, channel, male, date)
 
 
-async def fill_queue(cookies: str, group: list[int], channel: str, male: str, time: datetime, scheduler: AsyncIOScheduler):
+async def fill_queue(cookies: str, group: list[int], channel: str, male: str, time: datetime):
     result = check_remains_sum(group)
     if type(result) == int:
         hours = len(group)
@@ -207,12 +88,5 @@ async def fill_queue(cookies: str, group: list[int], channel: str, male: str, ti
         await add_fill_task(cookies, *format_data(channel, volume, male))
     if len(group) == 0:
         return
-    scheduler.add_job(
-        fill_queue,
-        args=[cookies, group, channel, male, time, scheduler],
-        next_run_time=time
-    )
-
-
-
+    await fill_queue(cookies, group, channel, male, time)
 
