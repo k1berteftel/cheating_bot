@@ -57,7 +57,7 @@ async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager
         jobs = await get_account_jobs(account + '.json')
         for job in jobs:
             buttons.append(
-                (f'{job.create.strftime('%d-%m-%Y %H:%M')}|{job.volume}', job.id)
+                (f'{job.create.strftime("%d-%m-%Y %H:%M")}|{job.volume}', job.id)
             )
         buttons = [buttons[i:i + 20] for i in range(0, len(buttons), 20)]
         dialog_manager.dialog_data["jobs"] = buttons
