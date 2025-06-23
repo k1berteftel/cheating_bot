@@ -31,7 +31,7 @@ def collect_fill_group(group: list[int]):
     return group, sum
 
 
-def format_data(channel: str, volume: int, male: str, hours: int = 1) -> tuple:
+def format_data(channel: str, volume: int, male: str, date: datetime.datetime, hours: int = 1) -> tuple:
     males = {
         'any': 0,
         'women': 1,
@@ -44,7 +44,7 @@ def format_data(channel: str, volume: int, male: str, hours: int = 1) -> tuple:
         speed = 5
         sub_speed = _get_custom_speed(volume, hours)
 
-    return channel, volume, males[male], speed, sub_speed
+    return channel, volume, males[male], date, speed, sub_speed
 
 
 def _get_allow_speed(volume: int) -> int:

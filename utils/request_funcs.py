@@ -29,7 +29,7 @@ class Order(BaseModel):
     # время последней подписки
     # отдельная очередь
     start: datetime | None
-    status: Literal['выполняется', 'выполнен', 'пауза', 'отмена', 'ошибка']
+    status: Literal['выполняется', 'выполнен', 'пауза', 'отмена', 'ошибка', 'отложенный запуск', 'в обработке']
     price: float
     create: datetime
 
@@ -116,7 +116,7 @@ async def get_account_balance(cookies: str) -> float | None:
         return float(balance)
 
 
-async def get_account_jobs(cookies: str) -> list[Order]:
+async def get_account_jobs(cookies: str) -> list[Order] | None:
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
@@ -127,13 +127,10 @@ async def get_account_jobs(cookies: str) -> list[Order]:
 
         page = await context.new_page()
         jobs = []
-        for i in range(0, 100):
+        for i in range(1, 100):
             await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={i}')
             html = await page.content()
             soup = BeautifulSoup(html, 'lxml')
-            paginator = soup.find('ul', class_='pagination')
-            if not paginator:
-                break
             tasks = soup.find_all('div', class_='detail')
             if not tasks:
                 break
@@ -141,6 +138,7 @@ async def get_account_jobs(cookies: str) -> list[Order]:
                 obj_type = task.find('h5', class_='m-t-0').find('a', href=True)['href'].strip()
                 if '/followers/1' not in obj_type:
                     continue
+                print('Страница: ', i)
                 objects = task.find_all('h5', class_='m-t-5')
                 price = float(task.find_all('h5', class_='ym-hide-content')[6].find('span').find('span').text.strip().split(' ')[0])
                 time = objects[13].find('span').text.split(':', maxsplit=1)[1].strip()
@@ -161,8 +159,10 @@ async def get_account_jobs(cookies: str) -> list[Order]:
                 )
         await context.close()
         await browser.close()
-    jobs = [Order.model_validate(job) for job in jobs]
-    return jobs
+    if jobs:
+        return [Order.model_validate(job) for job in jobs]
+    else:
+        return None
 
 
 async def turn_off_job(cookies: str, job_id: str, job_page: int) -> bool:

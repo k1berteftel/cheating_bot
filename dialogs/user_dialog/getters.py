@@ -51,10 +51,18 @@ async def jobs_pager(clb: CallbackQuery, widget: Button, dialog_manager: DialogM
 async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     account = dialog_manager.dialog_data.get('account')
     buttons = dialog_manager.dialog_data.get("jobs")
+    bot: Bot = dialog_manager.middleware_data.get('bot')
     print(buttons)
     if not buttons:
         buttons = []
         jobs = await get_account_jobs(account + '.json')
+        if not jobs:
+            await bot.send_message(
+                chat_id=event_from_user.id,
+                text='На этом аккаунте нету задач'
+            )
+            await dialog_manager.switch_to(startSG.cheating_menu)
+            return
         for job in jobs:
             buttons.append(
                 (f'{job.create.strftime("%d-%m-%Y %H:%M")}|{job.volume}', job.id)
@@ -139,6 +147,7 @@ async def choose_account_getter(event_from_user: User, dialog_manager: DialogMan
 
 
 async def choose_account(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
+    dialog_manager.dialog_data.clear()
     dialog_manager.dialog_data['account'] = accounts[int(item_id)]
     await dialog_manager.switch_to(startSG.cheating_menu)
 

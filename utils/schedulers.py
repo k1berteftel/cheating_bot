@@ -73,19 +73,19 @@ async def fill_queue(cookies: str, group: list[int], channel: str, male: str, ti
     if type(result) == int:
         hours = len(group)
         group = []
-        await add_fill_task(cookies, *format_data(channel, result, male, hours))
+        await add_fill_task(cookies, *format_data(channel, result, male, time, hours))
     elif group[0] < 10:
         old_len = len(group)
         group, volume = collect_fill_group(group)
         new_len = len(group)
+        print('short fill: ', *format_data(channel, volume, male, time, old_len - new_len))
+        await add_fill_task(cookies, *format_data(channel, volume, male, time, old_len - new_len))
         time += timedelta(hours=old_len - new_len)
-        print('short fill: ', *format_data(channel, volume, male, old_len - new_len))
-        await add_fill_task(cookies, *format_data(channel, volume, male, old_len - new_len))
     else:
         volume = group.pop(0)
+        print('basic fill: ', *format_data(channel, volume, male, time))
+        await add_fill_task(cookies, *format_data(channel, volume, male, time))
         time += timedelta(hours=1)
-        print('basic fill: ', *format_data(channel, volume, male))
-        await add_fill_task(cookies, *format_data(channel, volume, male))
     if len(group) == 0:
         return
     await fill_queue(cookies, group, channel, male, time)
