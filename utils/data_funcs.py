@@ -2,6 +2,7 @@ import datetime
 import math
 import random
 from typing import Literal
+from utils.request_funcs import Order
 
 
 morning = [29, 14, 9, 6, 5, 4, 2.5, 3, 4, 3, 3, 2, 1.5, 1, 0.75, 0.5, 0.25, 0.5, 1, 1, 1.5, 2.5, 3, 2]
@@ -70,6 +71,50 @@ def check_remains_sum(group: list[int]) -> bool | int:
     print(group[1::])
     volume = group[0] + remain
     return volume
+
+
+def _append_fill(jobs_group: list[Order], fills: list[list[Order]]) -> list[list[Order]]:
+    if fills:
+        for n in range(0, len(fills)):
+            if jobs_group[0].id == fills[n][0].id:
+                if len(jobs_group) > len(fills[n]):
+                    fills[n] = jobs_group
+                    break
+    else:
+        fills.append(jobs_group)
+    return fills
+
+
+def sort_orders(jobs: list[Order]) -> list[list[Order]]:
+    fills = []
+    add_group = []
+    jobs.sort(key=lambda x: x.create)
+    for i in range(0, len(jobs)):
+        jobs_group = [jobs[i]]
+        for j in range(i+1, len(jobs)):
+            differ = (jobs[i].create - jobs[j].create).total_seconds() / 60
+            if jobs[i].start and 0 <= abs(differ) < 15 and jobs[j].start:
+                jobs_group.append(jobs[j])
+            else:
+                break
+
+        if len(jobs_group) != 1:
+            jobs_group.sort(key=lambda x: x.start)
+            print('jobs_group: ', jobs_group)
+            time_1 = jobs_group[0].start
+            time_2 = jobs_group[-1].start
+            period = int(abs((time_1 - time_2).total_seconds() / 3600))
+            print(time_1, time_2, int(abs((time_1 - time_2).total_seconds() / 3600)))
+            if period == 23 and len(jobs_group) > 10:
+                fills = _append_fill(jobs_group, fills)
+            else:
+                if abs(period - 23) in range(0, 4) and len(jobs_group) > 10:
+                    job = jobs_group[-1]
+                    if job.speed.startswith('задержка'):
+                        delay = int(job.speed.split(' ')[1])
+                        if ((job.volume[1] // (60 / delay)) + period - 1) == 23:
+                            fills = _append_fill(jobs_group, fills)
+    return fills
 
 
 def _test_fill():

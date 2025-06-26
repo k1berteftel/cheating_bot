@@ -12,6 +12,9 @@ from utils.data_funcs import get_sub_groups, collect_fill_group, format_data, ch
 
 
 async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str, date: datetime) -> list[int]:
+    new_date = date.replace(hour=8, day=date.day + 1)
+    new_group = group[:12:] if date.hour == 10 else group[0:4]
+    await fill_queue(cookies, new_group, channel, male_d, new_date)
     males = {
         'any': 0,
         'women': 1,
@@ -45,11 +48,7 @@ async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str,
         await add_fill_task(cookies, channel, 10, male, date.replace(hour=3, day=date.day+1), 5, 12)
         await add_fill_task(cookies, channel, 30, male, date.replace(hour=5, minute=35, day=date.day+1), 5, 2)
         await add_fill_task(cookies, channel, 30, male, date.replace(hour=7, day=date.day+1), 0)
-    new_date = date.replace(hour=8, day=date.day + 1)
-    new_group = group[-2::] if date.hour == 10 else group[14::]
-    print('c 8 до остатка ', new_group)
-    await fill_queue(cookies, new_group, channel, male_d, new_date)
-    group = group[:12:] if date.hour == 10 else group[0:4]
+    group = group[-2::] if date.hour == 10 else group[14::]
     return group
 
 
@@ -64,7 +63,6 @@ async def start_fill_process(account: str, user_id: int, channel: str, volume: i
     print(cookies)
     if 300 <= sum(group) <= 1600:
         group = await sort_groups(channel, cookies, group, male, date)
-    print('до 22 ', group)
     await fill_queue(cookies, group, channel, male, date)
 
 

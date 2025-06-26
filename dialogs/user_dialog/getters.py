@@ -9,6 +9,7 @@ from aiogram_dialog.widgets.input import ManagedTextInput
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from utils.request_funcs import get_account_balance, get_account_jobs, Order, turn_off_job
+from utils.data_funcs import sort_orders
 from utils.schedulers import start_fill_process
 from utils.build_ids import get_random_id
 from database.model import AccountsTable
@@ -50,12 +51,15 @@ async def jobs_pager(clb: CallbackQuery, widget: Button, dialog_manager: DialogM
 
 async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     account = dialog_manager.dialog_data.get('account')
-    buttons = dialog_manager.dialog_data.get("jobs")
+    buttons = dialog_manager.dialog_data.get("buttons")
     bot: Bot = dialog_manager.middleware_data.get('bot')
     print(buttons)
     if not buttons:
         buttons = []
         jobs = await get_account_jobs(account + '.json')
+        print('jobs collect: ', jobs)
+        jobs = sort_orders(jobs)
+        print('after sort: ', jobs)
         if not jobs:
             await bot.send_message(
                 chat_id=event_from_user.id,
@@ -63,12 +67,13 @@ async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager
             )
             await dialog_manager.switch_to(startSG.cheating_menu)
             return
-        for job in jobs:
+        dialog_manager.dialog_data['jobs'] = jobs
+        for i in range(0, len(jobs)):
             buttons.append(
-                (f'{job.create.strftime("%d-%m-%Y %H:%M")}|{job.volume}', job.id)
+                (f'{jobs[i][0].start.strftime("%d-%m %H:%M")} - {jobs[i][-1].start.strftime("%H:%M")}', i)  #.strftime("%d-%m-%Y %H:%M")
             )
         buttons = [buttons[i:i + 20] for i in range(0, len(buttons), 20)]
-        dialog_manager.dialog_data["jobs"] = buttons
+        dialog_manager.dialog_data["buttons"] = buttons
     page = dialog_manager.dialog_data.get('page')
     if page is None:
         page = 0
@@ -89,36 +94,26 @@ async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager
 
 async def job_selector(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
     account = dialog_manager.dialog_data.get('account')
-    jobs = await get_account_jobs(account + '.json')
-    job_place = 1
-    task = None
-    for job in jobs:
-        if job.id == item_id:
-            task = job
-            print(job)
-            break
-        job_place += 1
-    print(job_place)
-    dialog_manager.dialog_data['job_page'] = (job_place // 60)
-    dialog_manager.dialog_data['job'] = task
+    jobs = dialog_manager.dialog_data.get('jobs')
+    dialog_manager.dialog_data['job'] = jobs[int(item_id)]
     await dialog_manager.switch_to(startSG.job_menu)
 
 
 async def job_menu_getter(dialog_manager: DialogManager, **kwargs):
-    job: Order = dialog_manager.dialog_data.get('job')
-    text = (f'<b>ID:</b> {job.id}\n<b>Название:</b> {job.name}\n<b>Название канала:</b> {job.channel_name}\n'
-            f'<b>Ссылка:</b> {job.link}\n<b>Пдп:</b> {job.volume[0]}/{job.volume[1]}\n<b>Пол:</b> {job.male}\n'
-            f'<b>Скорость:</b> {job.speed}\n<b>Отложенный запуск:</b> {job.start.strftime("%d-%m-%Y %H:%M") if job.start else "Нет"}\n<b>Статус:</b> {job.status}\n'
-            f'<b>Цена:</b> {job.price} р\n<b>Создан:</b> {job.create.strftime("%d-%m-%Y %H:%M")}')
+    job: list[Order] = dialog_manager.dialog_data.get('job')
+    text = (f'<b>Название канала:</b> {job[0].channel_name}\n'
+            f'<b>Ссылка:</b> {job[0].link}\n<b>Пдп:</b> '
+            f'{sum([task.volume[0] for task in job])}/{sum([task.volume[1] for task in job])}\n'
+            f'<b>Пол:</b> {job[0].male}\n<b>Отложенный запуск:</b> {job[0].start.strftime("%d-%m-%Y %H:%M")}'
+            f'\n<b>Создан:</b> {job[0].create.strftime("%d-%m-%Y %H:%M")}')
     return {'text': text}
 
 
 async def disable_job(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
-    job = dialog_manager.dialog_data.get('job')
+    job: list[Order] = dialog_manager.dialog_data.get('job')
     account = dialog_manager.dialog_data.get('account')
-    job_page = dialog_manager.dialog_data.get('job_page')
-    print(job_page)
-    result = await turn_off_job(account + '.json', job.id, job_page)
+    await clb.message.answer('Начался процесс удаления группы задач')
+    result = await turn_off_job(account + '.json', job)
     if not result:
         await clb.answer('Произошла какая-то ошибка при удалении')
         await dialog_manager.switch_to(startSG.tasks_menu)
