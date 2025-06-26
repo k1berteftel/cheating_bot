@@ -74,7 +74,7 @@ def check_remains_sum(group: list[int]) -> bool | int:
 
 
 def _append_fill(jobs_group: list[Order], fills: list[list[Order]]) -> list[list[Order]]:
-    if fills:
+    if fills and jobs_group[0].id in [job[0].id for job in fills]:
         for n in range(0, len(fills)):
             if jobs_group[0].id == fills[n][0].id:
                 if len(jobs_group) > len(fills[n]):
