@@ -11,10 +11,9 @@ from utils.request_funcs import add_fill_task
 from utils.data_funcs import get_sub_groups, collect_fill_group, format_data, check_remains_sum
 
 
-async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str, date: datetime) -> list[int]:
-    new_date = date.replace(hour=8, day=date.day + 1)
+async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str, date: datetime) -> tuple[list[int], datetime]:
     new_group = group[:12:] if date.hour == 10 else group[0:4]
-    await fill_queue(cookies, new_group, channel, male_d, new_date)
+    await fill_queue(cookies, new_group, channel, male_d, date)
     males = {
         'any': 0,
         'women': 1,
@@ -48,8 +47,9 @@ async def sort_groups(channel: str, cookies: str, group: list[int], male_d: str,
         await add_fill_task(cookies, channel, 10, male, date.replace(hour=3, day=date.day+1), 5, 12)
         await add_fill_task(cookies, channel, 30, male, date.replace(hour=5, minute=35, day=date.day+1), 5, 2)
         await add_fill_task(cookies, channel, 30, male, date.replace(hour=7, day=date.day+1), 0)
+    new_date = date.replace(hour=8, day=date.day + 1)
     group = group[-2::] if date.hour == 10 else group[14::]
-    return group
+    return group, new_date
 
 
 async def start_fill_process(account: str, user_id: int, channel: str, volume: int, male: str, date: datetime, bot: Bot):
@@ -62,7 +62,7 @@ async def start_fill_process(account: str, user_id: int, channel: str, volume: i
     cookies = account + '.json'
     print(cookies)
     if 300 <= sum(group) <= 1600:
-        group = await sort_groups(channel, cookies, group, male, date)
+        group, date = await sort_groups(channel, cookies, group, male, date)
     await fill_queue(cookies, group, channel, male, date)
 
 
