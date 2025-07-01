@@ -16,7 +16,12 @@ from database.model import AccountsTable
 from config_data.config import load_config, Config
 from states.state_groups import startSG
 
-accounts = ['Основа', 'Запасной', 'Резервный', 'Дополнительный']
+accounts = {
+    'Алекс': 'Основа',
+    'Артем': 'Запасной',
+    'Алекс резерв.': 'Резервный',
+    'Hugi': 'Дополнительный'
+}
 
 config: Config = load_config()
 
@@ -65,7 +70,7 @@ async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager
                 chat_id=event_from_user.id,
                 text='На этом аккаунте нету задач'
             )
-            await dialog_manager.switch_to(startSG.cheating_menu)
+            await dialog_manager.switch_to(startSG.cheating_menu, show_mode=ShowMode.DELETE_AND_SEND)
             return
         dialog_manager.dialog_data['jobs'] = jobs
         for i in range(0, len(jobs)):
@@ -130,20 +135,20 @@ async def choose_account_getter(event_from_user: User, dialog_manager: DialogMan
     if user_id == 5462623909 or user_id == 1236300146:
         accounts_list = accounts
     elif user_id == 2067909516:
-        accounts_list = [accounts[-1]]
+        accounts_list = dict([list(accounts.items())[-1]])
     elif user_id == 595650100:
-        accounts_list = [accounts[1]]
+        accounts_list = dict([list(accounts.items())[1]])
     else:
-        accounts_list = []
+        accounts_list = {}
     buttons = []
-    for index, account in enumerate(accounts_list):
-        buttons.append((account, index))
+    for name, account in accounts_list.items():
+        buttons.append((name, name))
     return {'items': buttons}
 
 
 async def choose_account(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
     dialog_manager.dialog_data.clear()
-    dialog_manager.dialog_data['account'] = accounts[int(item_id)]
+    dialog_manager.dialog_data['account'] = accounts[item_id]
     await dialog_manager.switch_to(startSG.cheating_menu)
 
 
