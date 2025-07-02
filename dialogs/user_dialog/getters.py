@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 from aiogram import Bot
@@ -70,8 +71,10 @@ async def tasks_menu_getter(event_from_user: User, dialog_manager: DialogManager
                 chat_id=event_from_user.id,
                 text='На этом аккаунте нету задач'
             )
-            await dialog_manager.switch_to(startSG.cheating_menu, show_mode=ShowMode.DELETE_AND_SEND)
-            return
+            return {
+                'items': [],
+                'pages': '0/0'
+            }
         dialog_manager.dialog_data['jobs'] = jobs
         for i in range(0, len(jobs)):
             buttons.append(
@@ -243,4 +246,4 @@ async def add_task(clb: CallbackQuery, widget: Button, dialog_manager: DialogMan
     await clb.message.answer('Задача накрутки была успешно добавлена')
     dialog_manager.dialog_data.clear()
     dialog_manager.dialog_data['account'] = account
-    await dialog_manager.switch_to(startSG.cheating_menu)
+    await dialog_manager.switch_to(startSG.cheating_menu, show_mode=ShowMode.DELETE_AND_SEND)

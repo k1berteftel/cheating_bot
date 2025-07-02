@@ -98,7 +98,7 @@ def sort_orders(jobs: list[Order]) -> list[list[Order]]:
                 break
 
         if len(jobs_group) != 1:
-            if jobs_group[0].create < (datetime.datetime.today() + datetime.timedelta(days=3)):
+            if jobs_group[0].create < (datetime.datetime.today() - datetime.timedelta(days=3)):
                 continue
             jobs_group.sort(key=lambda x: x.start)
             print('jobs_group: ', jobs_group)
