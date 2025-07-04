@@ -29,7 +29,7 @@ class Order(BaseModel):
     # время последней подписки
     # отдельная очередь
     start: datetime | None
-    status: Literal['выполняется', 'выполнен', 'пауза', 'отмена', 'ошибка', 'отложенный запуск', 'в обработке']
+    status: Literal['выполняется', 'выполнен', 'пауза', 'отмена', 'ошибка', 'отложенный запуск', 'в обработке', 'обрабатывается']
     price: float
     create: datetime
 
@@ -177,37 +177,38 @@ async def turn_off_job(cookies: str, jobs: list[Order], job_page=1) -> bool:
         page = await context.new_page()
         for i in range(0, len(jobs)):
             job_id = jobs[i].id
+            print(job_page)
             await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={job_page}')
             await asyncio.sleep(1.5)
             try:
-                await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=400.00)
+                await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
                 await page.click(f'#bTaskT1Delete_{job_id}', button='left')
             except Exception as err_1:
-                print(err_1)
+                print('Удаление задачи 1.1 ', err_1)
                 try:
-                    await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=400.00)
+                    await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Cancel_{job_id}')
                 except Exception as err_2:
-                    print(err_2)
+                    print('Удаление задачи 1.2 ', err_2)
                     await context.close()
                     await browser.close()
                     return await turn_off_job(cookies, jobs[i::], job_page+1)
             await asyncio.sleep(1)
             try:
-                await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=400.00)
+                await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
                 await page.click(f'#bTaskT1Delete_{job_id}', button='left')
             except Exception as err_1:
-                print('step 2', err_1)
+                print('Удаление задачи 2.1 ', err_1)
                 try:
                     await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=400.00)
                     await page.click(f'#bTaskT1Cancel_{job_id}')
                 except Exception as err_2:
-                    print('step 2', err_2)
+                    print('Удаление задачи 2.2 ', err_2)
                     await context.close()
                     await browser.close()
                     return await turn_off_job(cookies, jobs[i::], job_page+1)
-            await context.close()
-            await browser.close()
+        await context.close()
+        await browser.close()
 
         return True
 

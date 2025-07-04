@@ -119,8 +119,10 @@ async def job_menu_getter(dialog_manager: DialogManager, **kwargs):
 
 async def disable_job(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
     job: list[Order] = dialog_manager.dialog_data.get('job')
+    print(job)
     account = dialog_manager.dialog_data.get('account')
     await clb.message.answer('Начался процесс удаления группы задач')
+    print(account)
     result = await turn_off_job(account + '.json', job)
     if not result:
         await clb.answer('Произошла какая-то ошибка при удалении')

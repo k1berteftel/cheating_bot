@@ -105,14 +105,16 @@ def sort_orders(jobs: list[Order]) -> list[list[Order]]:
             time_1 = jobs_group[0].start
             time_2 = jobs_group[-1].start
             period = int(abs((time_1 - time_2).total_seconds() / 3600))
-            print(time_1, time_2, int(abs((time_1 - time_2).total_seconds() / 3600)))
-            if period == 23 and len(jobs_group) > 10:
+            print(time_1, time_2, int(abs((time_1 - time_2).total_seconds() / 3600)), len(jobs_group))
+            if period == 23 and len(jobs_group) >= 8:
                 fills = _append_fill(jobs_group, fills)
             else:
-                if abs(period - 23) in range(0, 4) and len(jobs_group) > 10:
+                print('join else')
+                if abs(period - 23) in range(0, 5) and len(jobs_group) >= 8:
                     job = jobs_group[-1]
                     if job.speed.startswith('задержка'):
                         delay = int(job.speed.split(' ')[1])
+                        print('delay: ', delay)
                         if ((job.volume[1] // (60 / delay)) + period - 1) == 23:
                             fills = _append_fill(jobs_group, fills)
     return fills
