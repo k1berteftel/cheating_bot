@@ -22,7 +22,7 @@ def collect_fill_group(group: list[int]):
     sum = 0
     del_indexes = []
     for i in range(0, len(group)):
-        if (group[i] < 10 and sum < 10) or (len(group[i::]) == 1 and group[i] < 10):
+        if sum < 10 or (len(group[i::]) == 1 and group[i] < 10):
             sum += group[i]
             del_indexes.append(i)
         else:
@@ -68,7 +68,6 @@ def check_remains_sum(group: list[int]) -> bool | int:
     remain = sum(group[1::])
     if remain >= 10 or len(group) == 1:
         return True
-    print(group[1::])
     volume = group[0] + remain
     return volume
 
@@ -121,7 +120,7 @@ def sort_orders(jobs: list[Order]) -> list[list[Order]]:
 
 
 def _test_fill():
-    limits = [300, 400, 500, 700]
+    limits = [300, 400, 450, 500, 700]
     date = datetime.date.today()
     time = datetime.time(hour=18, minute=00)
     time = datetime.datetime.combine(date=date, time=time)
@@ -141,11 +140,12 @@ def fill_imitation(count: int, time: datetime.datetime):
     print(f'Залив для {count} пдп')
     counter = 0
     group = get_sub_groups(count, 'evening')
-    print(group[14::])
+    #print(group[14::])
 
     for group in [group[0:4], group[14::]]:
         if counter == 1:
             time = time.replace(hour=8)
+        print('fill imitation: ', group)
         while len(group) != 0:
             print('Время: ', time.strftime("%Y-%m-%d %H:%M:%S"))
             print(group)
@@ -154,19 +154,19 @@ def fill_imitation(count: int, time: datetime.datetime):
                 print('remains sum')
                 hours = len(group)
                 group = []
-                data = format_data('', result, 'men', hours)
+                data = format_data('', result, 'men', time, hours)
             elif group[0] < 10:
                 old_len = len(group)
                 group, volume = collect_fill_group(group)
                 new_len = len(group)
                 time += datetime.timedelta(hours=old_len - new_len)
-                data = format_data('', volume, 'men', old_len - new_len)
+                data = format_data('', volume, 'men', time, old_len - new_len)
             else:
                 volume = group.pop(0)
                 time += datetime.timedelta(hours=1)
-                data = format_data('', volume, 'men')
+                data = format_data('', volume, 'men', time)
             print('Кол-во пдп:', data[1], f'({round(data[1] / count * 100)} %)', '| Скорость залива:',
-                  speeds[data[3]] if data[3] in range(0, 5) else f'1 пдп в {data[4]} минут')
+                  speeds[data[4]] if data[4] in range(0, 5) else f'1 пдп в {data[5]} минут')
         counter += 1
     print('\n\n')
 
