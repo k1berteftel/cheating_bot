@@ -140,7 +140,7 @@ def fill_imitation(count: int, time: datetime.datetime):
     print(f'Залив для {count} пдп')
     counter = 0
     group = get_sub_groups(count, 'evening')
-    #print(group[14::])
+    print(group[14::])
 
     for group in [group[0:4], group[14::]]:
         if counter == 1:
