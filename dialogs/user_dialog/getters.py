@@ -27,26 +27,6 @@ accounts = {
 config: Config = load_config()
 
 
-async def disable_task_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
-    scheduler: AsyncIOScheduler = dialog_manager.middleware_data.get("scheduler")
-    account = dialog_manager.dialog_data.get('account')
-    buttons = []
-    jobs = scheduler.get_jobs()
-    for job in jobs:
-        if job.id.startswith(account):
-            volume = job.args[3]
-            buttons.append((f'{job.id.split("_")[-1]}({volume} пдп)', job.id))
-    return {'items': buttons}
-
-
-async def choose_job_del(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
-    scheduler: AsyncIOScheduler = dialog_manager.middleware_data.get("scheduler")
-    job = scheduler.get_job(job_id=item_id)
-    if job:
-        job.remove()
-    await dialog_manager.switch_to(startSG.disable_task)
-
-
 async def jobs_pager(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
     if clb.data.startswith('next'):
         dialog_manager.dialog_data['page'] = dialog_manager.dialog_data.get('page') + 1
@@ -131,8 +111,12 @@ async def disable_job(clb: CallbackQuery, widget: Button, dialog_manager: Dialog
     dialog_manager.dialog_data['jobs'] = None
     dialog_manager.dialog_data['job'] = None
     dialog_manager.dialog_data['page'] = None
-    await clb.answer('Задача была успешно снята')
-    await dialog_manager.switch_to(startSG.tasks_menu)
+    dialog_manager.dialog_data['buttons'] = None
+    try:
+        await clb.message.answer('Задача была успешно снята')
+    except Exception:
+        ...
+    await dialog_manager.switch_to(startSG.tasks_menu, show_mode=ShowMode.DELETE_AND_SEND)
 
 
 async def choose_account_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
