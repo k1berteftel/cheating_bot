@@ -10,6 +10,7 @@ morning = [29, 14, 9, 6, 5, 4, 2.5, 3, 4, 3, 3, 2, 1.5, 1, 0.75, 0.5, 0.25, 0.5,
 evening = [28, 14, 8, 6, 5, 3, 2.5, 2, 1, 0.5, 0.75, 1, 1.75, 2, 3, 2, 2.5, 2, 3.5, 2.5, 2, 2.5, 3, 2]
 
 
+
 def get_sub_groups(volume: int, mode: Literal['morning', 'evening']) -> list[int]:
     percents = morning if mode == 'morning' else evening
     groups = []

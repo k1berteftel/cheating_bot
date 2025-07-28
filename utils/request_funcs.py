@@ -178,7 +178,11 @@ async def turn_off_job(cookies: str, jobs: list[Order], job_page=1) -> bool:
         for i in range(0, len(jobs)):
             job_id = jobs[i].id
             print(job_page)
-            await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={job_page}')
+            try:
+                await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={job_page}')
+            except Exception:
+                await asyncio.sleep(5)
+                await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={job_page}')
             await asyncio.sleep(1.5)
             try:
                 await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
@@ -191,7 +195,7 @@ async def turn_off_job(cookies: str, jobs: list[Order], job_page=1) -> bool:
                 try:
                     await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Cancel_{job_id}')
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(0.7)
                     await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Cancel_{job_id}')
                 except Exception as err_2:
@@ -200,7 +204,7 @@ async def turn_off_job(cookies: str, jobs: list[Order], job_page=1) -> bool:
                 try:
                     await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Delete_{job_id}', button='left')
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(0.7)
                     await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Delete_{job_id}', button='left')
                 except Exception:
