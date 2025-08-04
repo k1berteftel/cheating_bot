@@ -188,26 +188,28 @@ async def turn_off_job(cookies: str, jobs: list[Order], job_page=1) -> bool:
                 await page.click(f'#bTaskT1Delete_{job_id}', button='left')
             except Exception as err_1:
                 print('Удаление задачи 1.1 ', err_1)
+                await asyncio.sleep(1)
                 try:
                     await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Cancel_{job_id}')
-                    await asyncio.sleep(0.7)
+                    await asyncio.sleep(1)
                     await page.wait_for_selector(f'#bTaskT1Cancel_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Cancel_{job_id}')
                 except Exception as err_2:
                     print('Удаление задачи 1.2 ', err_2)
                     counter += 1
+                await asyncio.sleep(1)
                 try:
                     await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Delete_{job_id}', button='left')
-                    await asyncio.sleep(0.7)
+                    await asyncio.sleep(1)
                     await page.wait_for_selector(f'#bTaskT1Delete_{job_id}', timeout=4000.00)
                     await page.click(f'#bTaskT1Delete_{job_id}', button='left')
                 except Exception:
                     counter += 1
                     ...
             if counter == 2:
-                page += 1
+                job_page += 1
                 await page.goto(f'https://tmsmm.ru/social/orders?s=-1&page={job_page}')
             counter = 0
             await asyncio.sleep(1)
